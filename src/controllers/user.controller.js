@@ -5,7 +5,7 @@ import { APIresponse } from "../utils/APIresponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { v4 as uuid } from "uuid";
-// import { Token } from "../models/tokens.model.js";
+import { Token } from "../models/tokens.model.js";
 
 const generateAccessTokenInstance = async (userId) => {
   try {
@@ -22,12 +22,12 @@ const generateAccessTokenInstance = async (userId) => {
 
 const registerUser = asyncHandler(async (req, res) => {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    const { name,  email, password } = req.body;
     const ip =
       req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
     //check for all fields
     if (
-      [firstName, lastName, email, password].some(
+      [name, email, password].some(
         (field) => field?.trim() === ""
       )
     ) {
@@ -52,14 +52,14 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     const avatar = await uploadOnCloudinary(avatarLocalPath);
+console.log("avatarLocalPath:", avatarLocalPath);
 
     //generate uuid for user
     const uuidString = uuid();
 
     //create the user
     const createdUser = await User.create({
-      firstName,
-      lastName,
+      name,
       email,
       password,
       avatar: avatar?.url || "",
