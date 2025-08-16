@@ -20,6 +20,62 @@ const generateAccessTokenInstance = async (userId) => {
   }
 };
 
+const registerUser = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: "All fields are required",
+        },
+      });
+    }
+    if (password.length < 6) {
+      res.status(400).json({
+        success: false,
+        message: "password must be at least 6 characters",
+      });
+    }
+
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: "User already exists",
+        },
+      });
+    }
+
+    const createdUser = await User.create({
+      name,
+      email,
+      password,
+    });
+
+    const token = createdUser.generateAccessToken();
+
+    return res
+      .status(201)
+      .cookie("token", token)
+      .json({
+        success: true,
+        response: {
+          message: "User created successfully!",
+        },
+      });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      error: {
+        message: "Internal Server error",
+      },
+    });
+  }
+};
+/*
 const registerUser = asyncHandler(async (req, res) => {
   try {
     const { name,  email, password } = req.body;
@@ -99,7 +155,7 @@ console.log("avatarLocalPath:", avatarLocalPath);
     console.log("File: user.controller.js", "Line 15:", error);
     throw new APIError(500, "Something went wrong while registering the user");
   }
-});
+});  */
 
 const loginUser = asyncHandler(async (req, res) => {
   try {
@@ -144,18 +200,32 @@ const loginUser = asyncHandler(async (req, res) => {
       httpOnly: true,
       secure: true,
     };
-    return res
-      .status(200)
-      .cookie("token", tokenUUID, options)
-      .json(
-        new APIresponse(
-          200,
-          {
-            token: createdToken.uuid,
-          },
-          "User Logged In Successfully"
-        )
-      );
+   return res
+  .status(200)
+  .cookie("token", tokenUUID, options)
+  .json({
+    success: true,
+    message: "Login successful",
+    token: tokenUUID,
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      createdAt: user.createdAt,
+    },
+  });
+
+  //  return res
+  // .status(200)
+  // .cookie("token", tokenUUID, options)
+  // .json(
+  //   new APIresponse(
+  //     200,
+  //     { token: createdToken.uuid }, // <-- keep inside data
+  //     "User Logged In Successfully"
+  //   )
+  // );
   } catch (error) {
     console.log("File: user.controller.js", "Line 99:", error);
     throw new APIError(500, "Something went wrong while logging in the user");

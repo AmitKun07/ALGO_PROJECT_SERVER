@@ -8,7 +8,7 @@ const app = express();
 app.use(
   cors({
     // origin: "https://lead.indibus.net",
-    origin: process.env.NODE_ENV === 'production' ? "https://shady.odrly.com" : "http://localhost:3000",
+    origin: process.env.NODE_ENV === 'production' ? "https://shady.odrly.com" : "http://localhost:8080",
     credentials: true,
   })
 );
