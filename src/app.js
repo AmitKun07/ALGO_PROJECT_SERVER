@@ -34,6 +34,13 @@ try {
   console.log("File: app.js", "Line 33:", error);
   throw new Error("Error Occured in Routes", error);
 }
+import problemRouter from "./routes/problem.routes.js";
+try {
+  app.use("/api/v1/problem",problemRouter);
+} catch (error) {
+  console.log("File: app.js", "Line 33:", error);
+  throw new Error("Error Occured in Routes", error);
+}
 
 
 
