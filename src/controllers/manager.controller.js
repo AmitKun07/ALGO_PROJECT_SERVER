@@ -1,9 +1,39 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import generateOtp from "../utils/generateOtp.js";
-import { Manager } from "../models/manager.model.js";
+import  { Manager }  from "../models/manager.models.js";
 import generateOtp from "../utils/generateOtp.js";
 import sendEmail from "../utils/mailer.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { generateRoleToken } from "../utils/RoleToken.js";
+import { generateEncryptedKey } from "../utils/RoleToken.js";
+import { APIError } from "../utils/APIerror.js";
+
+const createManager = asyncHandler(async (req, res) => {
+  const { email, password, name } = req.body;
+
+  if (!email || !password ) {
+    throw new APIError(400, "Email, Password, and name are required");
+  }
+
+  const existing = await Manager.findOne({ email });
+  if (existing) {
+    throw new APIError(409, "Manager with this email already exists");
+  }
+
+  const manager = await Manager.create({ email, password, name });
+
+  res.status(201).json({
+    success: true,
+    message: "Manager created successfully",
+    manager: {
+      email: manager.email,
+      fullName: manager.name,
+      role: manager.role,
+      avatar: manager.avatar,
+      id: manager._id,
+    },
+  });
+});
 
 const loginManager = async (req, res) => {
   const { email, password } = req.body;
@@ -21,13 +51,13 @@ const loginManager = async (req, res) => {
 
     const token = manager.generateAccessToken();
 
-    // Generate a JWT token containing the manger's role
+   // Generate a JWT token containing the manger's role
     const roleToken = generateRoleToken("manager", process.env.MAN_SUFFIX);
 
     // Generate a randomized cookie key (prefixed with '002') for storing the role token
     const key = generateEncryptedKey(process.env.MAN_KEY_NAME); // '002'
 
-    const cookiesOption = {
+     const cookiesOption = {
       sameSite: "strict",
       httpOnly: false,
       secure: process.env.NODE_ENV === "development" ? false : true,
@@ -239,4 +269,4 @@ const resetPASS = async (req, res) => {
   }
 };
 
-export { loginManager, sendOTP, verifyOTP, resetPASS };
+export {  createManager, loginManager, sendOTP, verifyOTP, resetPASS };

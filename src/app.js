@@ -41,10 +41,13 @@ try {
   console.log("File: app.js", "Line 33:", error);
   throw new Error("Error Occured in Routes", error);
 }
-
-
-
-
+import managerRouter from "./routes/manager.routes.js";
+try {
+  app.use("/api/v1/manager", managerRouter);
+} catch (error) {
+  console.log("File: app.js", "Line 33:", error);
+  throw new Error("Error Occured in Routes", error);
+}
 
 
 

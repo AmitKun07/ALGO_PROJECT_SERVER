@@ -27,6 +27,11 @@ const problemSchema = new Schema({
     enum: ["new", "attempting", "attempted"],
     default: "new"
   },
+  platform: {
+    type: String,
+    enum: ["LeetCode", "HackerRank", "CodeSignal","CodeChef","InterviewBit", "AtCoder"],
+    required: true
+  },
   solution: {
     type: String,
   },
